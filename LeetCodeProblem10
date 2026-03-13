@@ -1,0 +1,35 @@
+public class Solution {
+    public boolean isMatch(String s, String p) {
+        // dp[i][j] will be true if s[0...i-1] matches p[0...j-1]
+        boolean[][] dp = new boolean[s.length() + 1][p.length() + 1];
+        dp[0][0] = true; // Empty string matches empty pattern
+
+        // Deal with patterns like a*b*c*
+        for (int j = 0; j < p.length(); j++) {
+            if (p.charAt(j) == '*' && dp[0][j - 1]) {
+                dp[0][j + 1] = true;
+            }
+        }
+
+        for (int i = 0; i < s.length(); i++) {
+            for (int j = 0; j < p.length(); j++) {
+                if (p.charAt(j) == '.' || p.charAt(j) == s.charAt(i)) {
+                    // If the current characters match or pattern has '.', take the result from the previous diagonal
+                    dp[i + 1][j + 1] = dp[i][j];
+                } else if (p.charAt(j) == '*') {
+                    // The '*' character affects the preceding character
+                    if (p.charAt(j - 1) != s.charAt(i) && p.charAt(j - 1) != '.') {
+                        // If preceding char doesn't match current s char, the '*' must mean zero occurrences
+                        dp[i + 1][j + 1] = dp[i + 1][j - 1];
+                    } else {
+                        // The '*' can mean zero, one, or more occurrences
+                        boolean zeroOccur = dp[i + 1][j - 1]; // Use zero preceding chars (skip 'char*')
+                        boolean oneOrMoreOccur = dp[i][j + 1]; // Use one or more (match current, stay at same p char)
+                        dp[i + 1][j + 1] = zeroOccur || oneOrMoreOccur;
+                    }
+                }
+            }
+        }
+        return dp[s.length()][p.length()];
+    }
+}
